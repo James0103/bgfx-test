@@ -5,7 +5,19 @@
   </head>
   <body>
     <h1>Background FX Test</h1>
+    <button id="loadButton">LOADING</button>
     <script>
+      const loadButton = document.getElementById('loadButton')
+
+      function loadSamples () {
+        console.log('hello')
+        sampleURL = URL.createObjectURL('sample/ir-wooden-kitchen.wav')
+        console.log(sampleURL)
+        sampleAudio = new Audio(sampleURL)
+        sampleAudio.play()
+      }
+
+      loadButton.addEventListener('click', loadSamples)
     </script>
   </body>
 </html>
