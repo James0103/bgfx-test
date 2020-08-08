@@ -361,6 +361,7 @@
         fxAudioSource.connect(fxGain)
         fxGain.connect(masterGain)
 
+        fxAudioSource.loop = true
         fxAudioSource.start(0)
       }
       // FX Ready Or Not
@@ -501,6 +502,7 @@
             dummyAudio = new Audio(audioURL)
             dummyAudio.muted = true
             fullDur = buffer.duration
+            endDur = buffer.duration
             curDurDOM.innerHTML = 0
             fullDurDOM.innerHTML = parseInt(buffer.duration)
             startDurDOM.innerHTML = 0
