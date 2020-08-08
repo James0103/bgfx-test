@@ -202,7 +202,7 @@
       const ir_samples = {
         camp: 'https://james0103.github.io/bgfx-test/ir/ir-wooden-kitchen.wav',
         library: 'https://james0103.github.io/bgfx-test/ir/ir-gallery.wav',
-        park: 'https://james0103.github.io/bgfx-test/ir/ir-wooden-kitchen.wav'
+        park: 'https://james0103.github.io/bgfx-test/ir/ir-small-church.wav'
       }
       const ir_buffers = {}
       const userFileDOM = document.getElementById('file-input')
@@ -283,7 +283,7 @@
           rangeInterval = setInterval(() => {
             if (dummyAudio.currentTime > startDur && dummyAudio.currentTime < endDur) {
               fxGain.gain.value = curFxValue / 4
-              convGain.gain.value = curFxValue / 4
+              convGain.gain.value = curFxValue / 8
             } else {
               fxGain.gain.value = 0
               convGain.gain.value = 0
@@ -316,7 +316,7 @@
           const value = parseInt(event.target.value)
           curFxValue = value / 100
           fxGain.gain.value = curFxValue / 4
-          convGain.gain.value = curFxValue / 4
+          convGain.gain.value = curFxValue / 8
         }
       }
       // Change Situation
@@ -374,7 +374,7 @@
         } else {
           fxState = true
           fxGain.gain.value = curFxValue / 4
-          convGain.gain.value = curFxValue / 4
+          convGain.gain.value = curFxValue / 8
           playFXWav()
           // getTimeRangeValue()
         }
