@@ -2,22 +2,542 @@
 <html>
   <head>
     <title>BGFX-TEST</title>
+    <style>
+      .section {
+        margin-bottom: 2rem;
+      }
+      .section.upload {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .section.bypass {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .section.situation {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .section.situation>.selector.situation {
+        margin-right: 2rem;
+      }
+      .section.situation>.selector.situation>select {
+        margin: 0;
+      }
+      .section.duration {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .section.duration>.duration-control {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        margin-top: 1rem;
+      }
+      .section.duration>.duration-control>input[type=range] {
+        margin: 0rem 1rem;
+        width: 30rem;
+      }
+      .section.setfx {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .section.setfx>.fx-time-control {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        position: relative;
+        width: 100%;
+        margin-top: 1rem;
+      }
+      .section.setfx>.fx-time-control>.time-range-slider {
+        position: relative;
+        width: 30rem;
+        height: 20px;
+        margin: 0rem 1rem;
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>.slider {
+        position: relative;
+        z-index: 1;
+        height: 10px;
+        margin: 0 15px;
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>.slider>.track {
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border-radius: 5px;
+        background-color: gray;
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>.slider>.range {
+        position: absolute;
+        z-index: 2;
+        left: 0%;
+        right: 0%;
+        top: 0;
+        bottom: 0;
+        border-radius: 5px;
+        background-color: rgb(51,51,51);
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>.slider>.thumb {
+        position: absolute;
+        z-index: 3;
+        width: 30px;
+        height: 30px;
+        background-color: rgb(51,51,51);
+        border-radius: 50%;
+        opacity: 1;
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>.slider>.thumb.left {
+        left: 0%;
+        transform: translate(-15px, -10px);
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>.slider>.thumb.right {
+        right: 0%;
+        transform: translate(15px, -10px);
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>input[type=range] {
+        position: absolute;
+        pointer-events: none;
+        -webkit-appearance: none;
+        z-index: 2;
+        height: 10px;
+        width: 100%;
+        opacity: 0;
+      }
+      .section.setfx>.fx-time-control>.time-range-slider>input[type=range]::-webkit-slider-thumb {
+        pointer-events: all;
+        width: 30px;
+        height: 30px;
+        border-radius: 0;
+        border: 0 none;
+        -webkit-appearance: none;
+      }
+    </style>
   </head>
   <body>
     <h1>Background FX Test</h1>
-    <button id="loadButton">LOADING</button>
+    <br>
+    <div class="section upload">
+      <label for="file-input">오디오 파일을 업로드해주세요</label>
+      <div class="controller">
+        <input type="file", id="file-input">
+        <button id="submit">로딩</button>
+        <button id="play">재생</button>
+        <button id="pause">일시정지</button>
+      </div>
+    </div>
+    <div class="section bypass">
+      <input type="radio" id="ori" name="bypass" value="ori" checked>
+      <label for="ori">원본</label>
+      <input type="radio" id="fx" name="bypass" value="fx">
+      <label for="fx">효과적용</label>
+    </div>
+    <div class="section situation">
+      <div class="selector situation">
+        <label for="user-selected-situation">상황을 선택하세요 :</label>
+        <select id="user-selected-situation">
+          <option value="camp" selected>야외캠핑장</option>
+          <option value="library">도서관</option>
+          <option value="park">공원</option>
+        </select>
+      </div>
+      <div class="selector type">
+        <label>얼만큼 적용할까요?</label>
+        <input type="radio" id="type-1" name="type" value="25" checked>
+        <label for="type-1">25%</label>
+        <input type="radio" id="type-2" name="type" value="50">
+        <label for="type-2">50%</label>
+        <input type="radio" id="type-3" name="type" value="75">
+        <label for="type-3">75%</label>
+      </div>
+    </div>
+    <div class="section duration">
+      <label for="duration-control">파일 길이</label>
+      <div class="duration-control">
+        <div id="dur cur">0</div>
+        <input type="range" id="duration-range" min="0" max="100" step="1" value="0">
+        <div id="dur full">0</div>
+      </div>
+    </div>
+    <div class="section setfx">
+      <label for="fx-time-control">효과 적용 구간</label>
+      <div class="fx-time-control">
+        <div id="dur start">0</div>
+        <div class="time-range-slider">
+          <input type="range" id="time-range-left" min="0" max="100" step="1" value="0">
+          <input type="range" id="time-range-right" min="0" max="100" step="1" value="100">
+          <div class="slider">
+            <div class="track"></div>
+            <div class="range"></div>
+            <div class="thumb left"></div>
+            <div class="thumb right"></div>
+          </div>
+        </div>
+        <div id="dur end">0</div>
+      </div>
+    </div>
     <script>
-      const loadButton = document.getElementById('loadButton')
+      const wav_samples = {
+        camp: 'https://james0103.github.io/bgfx-test/sample/camp_1.wav',
+        library: 'https://james0103.github.io/bgfx-test/sample/library_1.wav',
+        park: 'https://james0103.github.io/bgfx-test/sample/park_1.wav'
+      }
+      const wav_buffers = {}
+      const ir_samples = {
+        camp: 'https://james0103.github.io/bgfx-test/ir/ir-wooden-kitchen.wav',
+        library: 'https://james0103.github.io/bgfx-test/ir/ir-gallery.wav',
+        park: 'https://james0103.github.io/bgfx-test/ir/ir-wooden-kitchen.wav'
+      }
+      const ir_buffers = {}
+      const userFileDOM = document.getElementById('file-input')
+      const submitBtnDOM = document.getElementById('submit')
+      const playDOM = document.getElementById('play')
+      const pauseDOM = document.getElementById('pause')
+      const oriFileDOM = document.getElementById('ori')
+      const fxFileDOM = document.getElementById('fx')
+      const userSelectedSituationDOM = document.getElementById('user-selected-situation')
+      const typeOneDOM = document.getElementById('type-1')
+      const typeTwoDOM = document.getElementById('type-2')
+      const typeThreeDOM = document.getElementById('type-3')
+      const curDurDOM = document.getElementById('dur cur')
+      const fullDurDOM = document.getElementById('dur full')
+      const durRangeDOM = document.getElementById('duration-range')
 
-      function loadSamples () {
-        console.log('hello')
-        sampleURL = 'https://james0103.github.io/bgfx-test/sample/1min_asmr.wav'
-        console.log(sampleURL)
-        sampleAudio = new Audio(sampleURL)
-        sampleAudio.play()
+      const startDurDOM = document.getElementById('dur start')
+      const endDurDOM = document.getElementById('dur end')
+      const inputLeftDOM = document.getElementById('time-range-left')
+      const inputRightDOM = document.getElementById('time-range-right')
+      const thumbLeftDOM = document.querySelector('.slider > .thumb.left')
+      const thumbRightDOM = document.querySelector('.slider > .thumb.right')
+      const rangeDOM = document.querySelector('.slider > .range')
+      
+      let userUploadFile = ''
+      let loadedAudioContext = ''
+      let loadedBuffer = ''
+      let dummyAudio = ''
+      let loadedAudioSource = ''
+      let fxAudioSource = ''
+      let fxState = false
+      let curSituation = 0
+      let curFxValue = 0.0625
+      let curDur = 0
+      let fullDur = 0
+      let rangeInterval = ''
+      let startDur = 0
+      let endDur = 0
+      let frameReader = ''
+      let convolver = ''
+      let fxBuffer = ''
+      let fxGain = ''
+      let convGain = ''
+      let masterGain = ''
+      // Function for fx time range
+      function setLeftValue (event) {
+        const min = parseInt(event.target.min)
+        const max = parseInt(event.target.max)
+        
+        event.target.value = Math.min(parseInt(event.target.value), parseInt(inputRightDOM.value) - 1)
+        
+        const percent = ((event.target.value - min) / (max - min)) * 100
+        thumbLeftDOM.style.left = `${percent}%`
+        rangeDOM.style.left = `${percent}%`
+
+        getTimeRangeValue()
+      }
+      function setRightValue (event) {
+        const min = parseInt(event.target.min)
+        const max = parseInt(event.target.max)
+        
+        event.target.value = Math.max(parseInt(event.target.value), parseInt(inputLeftDOM.value) + 1)
+        
+        const percent = 100 - (((event.target.value - min) / (max - min)) * 100)
+        thumbRightDOM.style.right = `${percent}%`
+        rangeDOM.style.right = `${percent}%`
+
+        getTimeRangeValue()
+      }
+      // --
+
+      function releaseUserRange () {
+        clearInterval(rangeInterval)
       }
 
-      loadButton.addEventListener('click', loadSamples)
+      function detectUserRange () {
+        if (startDur !== 0 || endDur !== fullDur) {
+          rangeInterval = setInterval(() => {
+            if (dummyAudio.currentTime > startDur && dummyAudio.currentTime < endDur) {
+              fxGain.gain.value = curFxValue / 4
+              convGain.gain.value = curFxValue / 4
+            } else {
+              fxGain.gain.value = 0
+              convGain.gain.value = 0
+            }
+          }, 500)
+        }
+      }
+
+      function getTimeRangeValue () {
+        startDur = parseInt((fullDur * inputLeftDOM.value) / 100)
+        endDur = parseInt((fullDur * inputRightDOM.value) / 100)
+        startDurDOM.innerHTML = startDur
+        endDurDOM.innerHTML = endDur
+        if (fxState) {
+          pauseAudio()
+          playAudio()
+          if (startDur > 6) {
+            dummyAudio.currentTime = startDur - 5
+          } else {
+            dummyAudio.currentTime = 0
+          }
+          fxGain.gain.value = 0
+          convGain.gain.value = 0
+        }
+      }
+
+      // change fx volume with controller
+      function onSetFxGainValue (event) {
+        if (fxState) {
+          const value = parseInt(event.target.value)
+          curFxValue = value / 100
+          fxGain.gain.value = curFxValue / 4
+          convGain.gain.value = curFxValue / 4
+        }
+      }
+      // Change Situation
+      function onChangeSituation (event) {
+        if (fxState) {
+          switch (event.target.value) {
+            case 'camp':
+              setConvolverBuffer('camp')
+              setSourceBuffer('camp')
+              break
+            case 'library':
+              setConvolverBuffer('library')
+              setSourceBuffer('library')
+              break
+            case 'park':
+              setConvolverBuffer('park')
+              setSourceBuffer('park')
+              break
+          }
+        }
+
+        function setConvolverBuffer (key) {
+          convolver.buffer = ir_buffers[key]
+        }
+
+        function setSourceBuffer (key) {
+          pauseFXWav()
+          fxBuffer = wav_buffers[key]
+          playFXWav()
+        }
+      }
+      // Control Pausing Fx Wave
+      function pauseFXWav () {
+        fxAudioSource.stop()
+      }
+      // Control Playing Fx Wave
+      function playFXWav () {
+        fxAudioSource = loadedAudioContext.createBufferSource()
+        fxAudioSource.buffer = fxBuffer
+
+        fxAudioSource.connect(convGain)
+        fxAudioSource.connect(fxGain)
+        fxGain.connect(masterGain)
+
+        fxAudioSource.start(0)
+      }
+      // FX Ready Or Not
+      function onApplyFX (event) {
+        if (event.target.value === 'ori') {
+          fxState = false
+          fxGain.gain.value = 0
+          convGain.gain.value = 0
+          pauseFXWav()
+        } else {
+          fxState = true
+          fxGain.gain.value = curFxValue / 4
+          convGain.gain.value = curFxValue / 4
+          playFXWav()
+          // getTimeRangeValue()
+        }
+      }
+      // Control Slider Value From User on Slider
+      function setDurationSlider () {
+        dummyAudio.currentTime = (durRangeDOM.value * fullDur) / 100
+        curDur = dummyAudio.currentTime
+        if (!dummyAudio.paused) {
+          pauseAudio()
+          playAudio()
+        }
+      }
+      // Set Duration Slider Value
+      function setSliderValue (value) {
+        const convertedValue = (100 * value) / fullDur
+        durRangeDOM.value = parseInt(convertedValue)
+      }
+      // Release Current Duration
+      function releaseCurrentDuration () {
+        cancelAnimationFrame(frameReader)
+      }
+      // Get Current Duration on Duration Slider
+      function getCurrentDuration () {
+        frameReader = requestAnimationFrame(outputTimeStamp)
+
+        function outputTimeStamp () {
+          const timeStamp = loadedAudioContext.getOutputTimestamp()
+          dummyAudio.ontimeupdate = () => { timeUpdate() }
+
+          function timeUpdate () {
+            curDur = dummyAudio.currentTime
+            curDurDOM.innerHTML = parseInt(curDur)
+            setSliderValue(curDur)
+            if (curDur >= fullDur) {
+              curDur = 0
+              curDurDOM.innerHTML = parseInt(curDur)
+              setSliderValue(curDur)
+              pauseAudio()
+            }
+          }
+          frameReader = requestAnimationFrame(outputTimeStamp)
+        }
+      }
+      // Control Pause MAIN AUDIO FILE and Suspend Audio Context
+      function pauseAudio () {
+        loadedAudioSource.stop()
+        loadedAudioContext.suspend()
+        dummyAudio.pause()
+        releaseCurrentDuration()
+        if (fxState) {
+          pauseFXWav()
+        }
+        // releaseUserRange()
+      }
+      // Control Playing MAIN AUDIO FILE and Resume Audio Context
+      function playAudio () {
+        loadedAudioSource = loadedAudioContext.createBufferSource()
+        loadedAudioSource.buffer = loadedBuffer
+
+        loadedAudioSource.connect(convGain)
+        loadedAudioSource.connect(masterGain)
+
+        loadedAudioContext.resume()
+        if (curDur !== 0) {
+          loadedAudioSource.start(0, curDur, fullDur)
+        } else {
+          loadedAudioSource.start(0)
+        }
+        dummyAudio.play()
+
+        if (fxAudioSource !== '') {
+          if (fxState) {
+            playFXWav()
+          } else {
+            pauseFXWav()
+          }
+        }
+
+        detectUserRange()
+        getCurrentDuration()
+      }
+      // Loading All Background Waveform Buffer
+      function getBackgroundFX () {
+        Object.keys(wav_samples).forEach(async key => {
+          const response = await fetch(wav_samples[key])
+          const arraybuffer = await response.arrayBuffer()
+          const audioBuffer = await loadedAudioContext.decodeAudioData(arraybuffer)
+          wav_buffers[key] = audioBuffer
+          fxBuffer = wav_buffers['camp']
+        })
+      }
+      // Loading All Impulse Buffer
+      function getImpulse () {
+        convolver = loadedAudioContext.createConvolver()
+        Object.keys(ir_samples).forEach(async key => {
+          const response = await fetch(ir_samples[key])
+          const arraybuffer = await response.arrayBuffer()
+          const audioBuffer = await loadedAudioContext.decodeAudioData(arraybuffer)
+          ir_buffers[key] = audioBuffer
+          convolver.buffer = ir_buffers['camp']
+        })
+
+        convGain.connect(convolver)
+        convolver.connect(masterGain)
+      }
+      // Initialize Audio Context and MAIN AUDIO FILE Buffer -> getImpulse() / getBackgroundFX()
+      function onInitFunction () {
+        const audioURL = URL.createObjectURL(userUploadFile)
+        const AudioContext = window.AudioContext || window.webkitAudioContext
+        const audioContext = new AudioContext({ latencyHint: 'playback' })
+        loadedAudioContext = audioContext
+        fxGain = loadedAudioContext.createGain()
+        convGain = loadedAudioContext.createGain()
+        masterGain = loadedAudioContext.createGain()
+        masterGain.connect(loadedAudioContext.destination)
+
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', audioURL)
+        xhr.responseType = 'arraybuffer'
+        xhr.onload = () => {
+          loadedAudioContext.decodeAudioData(xhr.response, buffer => {
+            loadedBuffer = buffer
+            loadedAudioContext.suspend()
+            dummyAudio = new Audio(audioURL)
+            dummyAudio.muted = true
+            fullDur = buffer.duration
+            curDurDOM.innerHTML = 0
+            fullDurDOM.innerHTML = parseInt(buffer.duration)
+            startDurDOM.innerHTML = 0
+            endDurDOM.innerHTML = parseInt(buffer.duration)
+          })
+        }
+        xhr.send()
+
+        getImpulse()
+        getBackgroundFX()
+        fxGain.gain.value = 0
+        convGain.gain.value = 0
+        masterGain.gain.value = 1
+      }
+      // Loading Audio File
+      function getFile (event) {
+        userUploadFile = event.target.files[0]
+      }
+
+      // Control Audio File and Transpose
+      userFileDOM.addEventListener('change', getFile)
+      submitBtnDOM.addEventListener('click', onInitFunction)
+      playDOM.addEventListener('click', playAudio)
+      pauseDOM.addEventListener('click', pauseAudio)
+      // Control FX
+      oriFileDOM.addEventListener('click', onApplyFX)
+      fxFileDOM.addEventListener('click', onApplyFX)
+      // Set Situation
+      userSelectedSituationDOM.addEventListener('change', onChangeSituation)
+      // Control Fx Wave Volume
+      typeOneDOM.addEventListener('click', onSetFxGainValue)
+      typeTwoDOM.addEventListener('click', onSetFxGainValue)
+      typeThreeDOM.addEventListener('click', onSetFxGainValue)
+      // Control Range Duration
+      durRangeDOM.addEventListener('input', setDurationSlider)
+      inputLeftDOM.addEventListener('input', setLeftValue)
+      inputRightDOM.addEventListener('input', setRightValue)
     </script>
   </body>
 </html>
